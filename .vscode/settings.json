@@ -1,0 +1,48 @@
+{
+    "files.associations": {
+        "*.tcc": "c",
+        "functional": "c",
+        "streambuf": "c",
+        "iosfwd": "cpp",
+        "iostream": "cpp",
+        "stdexcept": "cpp",
+        "typeinfo": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "Enabled"
+}/*
+{
+    "[cpp]": {
+        "editor.formatOnType": true,
+        "editor.formatOnSave": true,
+        "editor.renderIndentGuides": true,
+        "editor.insertSpaces": true,
+        "editor.detectIndentation": true,
+        "editor.tabSize": 4
+    },
+    "clang.executable" : "C:\\Program Files\\LLVM\\bin\\clang.exe",
+    "clang.cflags": [
+        "-std=c99",
+        "-IC:\\MinGW\\include",
+        "-IC:\\MinGW\\lib\\gcc\\mingw32\\6.3.0\\include",
+        "-I${workspaceRoot}\\include",
+        "-I${cwd}"
+    ],
+    "clang.cxxflags": [ 
+        "-std=c++11",
+        "-IC:\\MinGW\\include",
+        "-IC:\\MinGW\\lib\\gcc\\mingw32\\6.3.0\\include",
+        "-IC:\\MinGW\\lib\\gcc\\mingw32\\6.3.0\\include\\c++",
+        "-I${workspaceRoot}\\include",
+        "-I${cwd}"
+    ],
+    "clang.completion.enable": true,
+    "code-runner.runInTerminal": true,
+    "files.associations": {
+        "stdlib.h": "c"
+    },
+    "code-runner.ignoreSelection": true,
+    "code-runner.saveFileBeforeRun": true,
+    "code-runner.preserveFocus": false
+
+  }
+  */
