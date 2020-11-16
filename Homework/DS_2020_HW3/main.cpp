@@ -64,34 +64,34 @@ int main(int argc, char *argv[])
     string input;
     cin >> input;
 
-    Tree tree(input);
+    Tree *tree = new Tree(input);
 
     while (cin >> input)
     {
         if (input == "Traverse")
         {
-            tree.printPreorder();
-            tree.printInorder();
-            tree.printPostorder();
+            tree->printPreorder();
+            tree->printInorder();
+            tree->printPostorder();
         }
         else if (input == "Height")
-            tree.Height();
+            tree->Height();
         else if (input == "WeightSum")
-            tree.WeightSum();
+            tree->WeightSum();
         else if (input == "MaximumPathSum")
-            tree.MaximumPathSum();
+            tree->MaximumPathSum();
         else if (input == "BinaryTower")
-            tree.BinaryTower();
+            tree->BinaryTower();
         else if (input == "DeleteLeaf")
-            tree.DeleteLeaf();
+            tree->DeleteLeaf();
         else if (input == "Foldable")
-            tree.Foldable();
+            tree->Foldable();
         else if (input == "End")
         {
             if (cin >> input)
             {
-                delete &tree;
-                tree = *new Tree(input);
+                delete tree;
+                tree = new Tree(input);
             }
             else
                 break;
@@ -147,7 +147,11 @@ Tree::Tree (string input)
 
 void Tree::printPreorder()
 {
-    if (root == NULL) return;
+    if (root == NULL) 
+    {
+        cout << endl;
+        return;
+    }
 
     Stack<Node<int>*> st;
     Node<int> *node;
@@ -261,7 +265,10 @@ int Tree::MaximumPathSum(Node<int>* parent)
 {
     if (!parent)
     {
-        cout << MaximumPathSum(root) << endl;
+        if (root)
+            cout << MaximumPathSum(root) << endl;
+        else
+            cout << 0 << endl;
         return 0;
     }
     else
@@ -269,9 +276,9 @@ int Tree::MaximumPathSum(Node<int>* parent)
         if (!parent->left && !parent->right)
             return parent->weight;
         else if (parent->left && !parent->right)
-            return MaximumPathSum(parent->right) + parent->weight;
-        else if (!parent->left && parent->right)
             return MaximumPathSum(parent->left) + parent->weight;
+        else if (!parent->left && parent->right)
+            return MaximumPathSum(parent->right) + parent->weight;
         else
             return max(MaximumPathSum(parent->left), MaximumPathSum(parent->right)) + parent->weight;
     }
@@ -279,20 +286,24 @@ int Tree::MaximumPathSum(Node<int>* parent)
 
 int Tree::BinaryTower(Node<int> *parent)
 {
-    int i = 0;
+    int i = 0, ans = 0;
 
     if (parent->left || parent->right)
     {
-        if (parent->right && !parent->right->tower || parent->left && !parent->left->tower)
+        if (parent->left && parent->right)
+            ans = BinaryTower(parent->right) + BinaryTower(parent->left);
+        else if (parent->left)
+            ans = BinaryTower(parent->left);
+        else
+            ans = BinaryTower(parent->right);
+
+        if ((parent->right && !parent->right->tower) || (parent->left && !parent->left->tower))
         {
             i = 1;
             parent->tower = true;
         }
 
-        if (parent->left)
-            return BinaryTower(parent->left) + i;
-        else
-            return BinaryTower(parent->right) + i;
+        return ans + i;
     }
     else
         return 0;
@@ -300,7 +311,13 @@ int Tree::BinaryTower(Node<int> *parent)
 
 void Tree::BinaryTower()
 {
-    cout << BinaryTower(root) << endl;
+    if (root)
+        cout << BinaryTower(root) << endl;
+    else
+    {
+        cout << 0 << endl;
+        return;
+    }
 
     Stack<Node<int>*> st;
     Node<int> *node;
@@ -372,6 +389,12 @@ void Tree::DeleteLeaf()
 
 void Tree::Foldable()
 {
+    if (!root)
+    {
+        cout << "Yes\n";
+        return;
+    }
+
     Node<int> *right = root->right, *left = root->left;
     Stack<Node<int>*> st_right, st_left;
 
@@ -408,8 +431,8 @@ void Tree::Foldable()
             st_right.push(right->right);
             st_right.push(right->left);
 
-            st_left.push(right->left);
-            st_left.push(right->right);
+            st_left.push(left->left);
+            st_left.push(left->right);
         }
     }
 
