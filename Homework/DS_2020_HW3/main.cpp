@@ -286,7 +286,7 @@ int Tree::MaximumPathSum(Node<int>* parent)
 
 int Tree::BinaryTower(Node<int> *parent)
 {
-    int i = 0, ans = 0;
+    int i = 0, ans = 0, t = 1;
 
     if (parent->left || parent->right)
     {
@@ -301,6 +301,30 @@ int Tree::BinaryTower(Node<int> *parent)
         {
             i = 1;
             parent->tower = true;
+
+            if (parent == root)
+            {
+                if (!root->right->tower)
+                {
+                    if (root->right->left && root->right->left->tower)
+                        t = 0;
+                    else if (root->right->right && root->right->right->tower)
+                        t = 0;
+                }
+                else t = 0;
+
+                if (!root->left->tower)
+                {
+                    if (root->left->left && root->left->left->tower)
+                        i = 0;
+                    else if (root->left->right && root->left->right->tower)
+                        i = 0;
+                }
+                else i = 0;
+
+                if ((t || i) || (!root->left->tower && !root->right->tower))
+                    i = 1;
+            }
         }
 
         return ans + i;
@@ -311,13 +335,18 @@ int Tree::BinaryTower(Node<int> *parent)
 
 void Tree::BinaryTower()
 {
-    if (root)
-        cout << BinaryTower(root) << endl;
-    else
+    if (!root)
     {
         cout << 0 << endl;
         return;
     }
+    else if (!root->left && !root->right)
+    {
+        cout << 1 << endl;
+        return;
+    }
+    else 
+        cout << BinaryTower(root) << endl;
 
     Stack<Node<int>*> st;
     Node<int> *node;
@@ -412,7 +441,7 @@ void Tree::Foldable()
     st_right.push(right);
     st_left.push(left);
 
-    while (!st_right.empty() || !st_left.empty())
+    while (!st_right.empty() && !st_left.empty())
     {
         right = st_right.top();
         left = st_left.top();
@@ -436,7 +465,10 @@ void Tree::Foldable()
         }
     }
 
-    cout << "Yes\n";
+    if (!st_left.empty() || !st_right.empty())
+        cout << "No\n";
+    else
+        cout << "Yes\n";
 }
 
 void Tree::deleteTree(Node<int> *parent)
