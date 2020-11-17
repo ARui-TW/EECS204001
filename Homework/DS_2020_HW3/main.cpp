@@ -28,12 +28,12 @@ class Node
 
 public:
     Node ();
-    Node (T data) : weight(data), tower(false){}
+    Node (T data) : weight(data), tower(false), covered(false){}
     ~Node() {};
 
 private:
     T weight;
-    bool tower;
+    bool tower, covered;
     Node *left, *right;
 };
 
@@ -297,35 +297,17 @@ int Tree::BinaryTower(Node<int> *parent)
         else
             ans = BinaryTower(parent->right);
 
-        if ((parent->right && !parent->right->tower) || (parent->left && !parent->left->tower))
+        if ((parent->right && parent->right->tower) || (parent->left && parent->left->tower))
+            parent->covered = true;
+        
+        if ((parent->right && !parent->right->covered) || (parent->left && !parent->left->covered))
         {
             i = 1;
             parent->tower = true;
-
-            if (parent == root)
-            {
-                if (!root->right->tower)
-                {
-                    if (root->right->left && root->right->left->tower)
-                        t = 0;
-                    else if (root->right->right && root->right->right->tower)
-                        t = 0;
-                }
-                else t = 0;
-
-                if (!root->left->tower)
-                {
-                    if (root->left->left && root->left->left->tower)
-                        i = 0;
-                    else if (root->left->right && root->left->right->tower)
-                        i = 0;
-                }
-                else i = 0;
-
-                if ((t || i) || (!root->left->tower && !root->right->tower))
-                    i = 1;
-            }
+            parent->covered = true;
         }
+        if (parent == root && !root->left->tower && !root->left->tower)
+            i = 1;
 
         return ans + i;
     }
@@ -358,6 +340,7 @@ void Tree::BinaryTower()
         node = st.top();
         st.pop();
         node->tower = false;
+        node->covered = false;
         if (node->right) st.push(node->right);
         if (node->left) st.push(node->left);
     }
