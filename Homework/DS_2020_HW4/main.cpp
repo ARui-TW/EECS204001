@@ -3,24 +3,29 @@
 
 using namespace std;
 
-class node
+class Node
 {
 	friend class Graph;
 
 public:
-	node();
+	Node();
+	Node(int d, int p, int a) : dest(d), airline(a), price(p) {}
 
 private:
-	int nextCity;
+	int dest;
 	int airline;
 	int price;
+	Node *nxt;
 };
 
 class Graph
 {
 public:
 	Graph(int n) : nodeNum(n) {
-		city = new node*[n];
+		city = new Node*[n];
+
+		for (int i = 0; i < n; i++)
+			city[i] = NULL;
 	}
 
 	void add(int, int, int, int);
@@ -29,7 +34,7 @@ public:
 
 private:
 	int nodeNum;
-	node **city;
+	Node **city;
 };
 
 int main(int argc, char *argv[])
@@ -64,21 +69,42 @@ int main(int argc, char *argv[])
 		}
 		else cout << "error: invalid command\n";
 	}
-	
+
 
 	return 0;
 }
 
 void Graph::add(int srt, int dest, int price, int airline)
 {
+	Node *node = new Node(dest, price, airline);
+
+	node->nxt = city[srt];
+	city[srt] = node;
 }
 
 int Graph::request(int, int, int)
 {
 }
 
-void Graph::del(int, int, int)
+void Graph::del(int start, int dest, int airline)
 {
+	Node *cur = city[start], *pre = NULL;
+
+	while (cur)
+	{
+		if (cur->dest == dest && cur->airline == airline)
+		{
+			if (pre)
+				pre->nxt = cur->nxt;
+			else
+				city[start] = cur->nxt;
+
+			delete cur;
+			cur = pre;
+		}
+		pre = cur;
+		cur = (cur)? cur->nxt : city[start];
+	}
 }
 
 // By ARui
