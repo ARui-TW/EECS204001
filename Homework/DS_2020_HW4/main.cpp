@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+#include <algorithm>
+#include <limits.h>
 
 using namespace std;
 
@@ -26,15 +28,19 @@ public:
 
 		for (int i = 0; i < n; i++)
 			city[i] = NULL;
+
+		visited = new bool[n];
 	}
 
 	void add(int, int, int, int);
-	int request(int, int, int);
+	int request(int, int, int, int);
+	void setBool();
 	void del(int, int, int);
 
 private:
 	int nodeNum;
 	Node **city;
+	bool *visited;
 };
 
 int main(int argc, char *argv[])
@@ -55,10 +61,14 @@ int main(int argc, char *argv[])
 		}
 		else if (command == "Request")
 		{
-			int scr, dst, w;
+			int scr, dst, w, ans;
 
 			cin >> scr >> dst >> w;
-			cout << gr.request(scr, dst, w) << endl;
+
+			gr.setBool();
+			ans = gr.request(scr, dst, w, -1);
+			ans = (ans == INT_MAX)? -1 : ans;
+			cout << ans << endl;
 		}
 		else if (command == "Delete")
 		{
@@ -82,8 +92,39 @@ void Graph::add(int srt, int dest, int price, int airline)
 	city[srt] = node;
 }
 
-int Graph::request(int, int, int)
+void Graph::setBool()
 {
+	fill(visited, visited + nodeNum, false);
+}
+
+int Graph::request(int start, int dist, int budget, int lastAirline)
+{
+	if (start == dist)
+		return 0;
+
+	Node *cur = city[start];
+	int price = INT_MAX, temp;
+	int curPrice;
+
+	visited[start] = true;
+
+	while (cur)
+	{
+		curPrice = (lastAirline == cur->airline || lastAirline == -1)? cur->price : cur->price + 5;
+
+		if (!visited[cur->dest] && (budget - curPrice) >= 0)
+		{
+			temp = request(cur->dest, dist, budget - curPrice, cur->airline);
+			temp = (temp == INT_MAX)? temp : temp + curPrice;
+			price = min(temp, price);
+		}
+
+		cur = cur->nxt;
+	}
+
+	visited[start] = false;
+
+	return price;
 }
 
 void Graph::del(int start, int dest, int airline)
