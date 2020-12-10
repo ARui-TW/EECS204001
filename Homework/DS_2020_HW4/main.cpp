@@ -41,6 +41,7 @@ private:
 	int nodeNum;
 	Node **city;
 	bool *visited;
+	int maxBudget;
 };
 
 int main(int argc, char *argv[])
@@ -86,21 +87,39 @@ int main(int argc, char *argv[])
 
 void Graph::add(int srt, int dest, int price, int airline)
 {
-	Node *node = new Node(dest, price, airline);
+	Node *cur = city[srt];
+	bool flag = false;
+	while (cur && !flag)
+	{
+		if (cur->airline == airline && cur->dest == dest && cur->price < price)
+			flag = true;
 
-	node->nxt = city[srt];
-	city[srt] = node;
+		cur = cur->nxt;
+	}
+	
+	if (!flag)
+	{
+		Node *node = new Node(dest, price, airline);
+
+		node->nxt = city[srt];
+		city[srt] = node;
+	}
 }
 
 void Graph::setBool()
 {
 	fill(visited, visited + nodeNum, false);
+	maxBudget = -1;
 }
 
 int Graph::request(int start, int dist, int budget, int lastAirline)
 {
 	if (start == dist)
+	{
+		if (budget >= maxBudget)
+			maxBudget = budget;
 		return 0;
+	}
 
 	Node *cur = city[start];
 	int price = INT_MAX, temp;
@@ -112,7 +131,7 @@ int Graph::request(int start, int dist, int budget, int lastAirline)
 	{
 		curPrice = (lastAirline == cur->airline || lastAirline == -1)? cur->price : cur->price + 5;
 
-		if (!visited[cur->dest] && (budget - curPrice) >= 0)
+		if (!visited[cur->dest] && (budget - curPrice) >= 0 && (budget - curPrice) >= maxBudget)
 		{
 			temp = request(cur->dest, dist, budget - curPrice, cur->airline);
 			temp = (temp == INT_MAX)? temp : temp + curPrice;
