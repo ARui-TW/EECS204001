@@ -50,10 +50,10 @@ int main(int argc, char *argv[])
         for (int i = n - 2; i >= 0; i--)
         {
             // cout << i << endl;
-            if (!op)
-                QQ_count += search(root, (double)(list[i] / 2.0));
-
             searchFrom = insert(root, list[i]);
+
+            if (!op)
+                QQ_count += search(searchFrom, (double)(list[i] / 2.0));
 
         }
 
@@ -76,6 +76,7 @@ Node* insert (Node *root, int num)
     Node *cur = root;
     Node *pre = root;
     Node *node = new Node(num);
+    bool first = true;
 
     while (cur)
     {
@@ -88,7 +89,10 @@ Node* insert (Node *root, int num)
         }
         else // cur->num < num
         {
-            ans = cur->left;
+            if (first)
+                ans = cur;
+            
+            first = false;
             cur->child++;
             pre = cur;
             cur = cur->right;
@@ -143,11 +147,13 @@ int K_Largest(Node* root, int K)
             cur_Kth = cur->right->child + 2 + count;
         else
             cur_Kth = 1 + count;
+
+        // cout << cur_Kth << " " << cur->num << endl;
         
         if (K > cur_Kth)
         {
             cur = cur->left;
-            count += cur_Kth;
+            count = cur_Kth;
         }
         else if (K < cur_Kth)
         {
@@ -157,7 +163,7 @@ int K_Largest(Node* root, int K)
             return cur->num;
     }
 
-    return 0;
+    return -1;
 }
 
 // By ARui
