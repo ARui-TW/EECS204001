@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include <stdlib.h>
+#include <numeric>
 
 #define MaxVertices 82168
 
@@ -14,10 +15,15 @@ using namespace std;
 
 vector<vector<int>> graph(MaxVertices);
 vector<int> graph_rank(MaxVertices);
+int vertexColor[MaxVertices + 1];
+vector<vector<int>> colorVertex(MaxVertices);
 int Max = -1;
 
 void signalHandler(int);
 void FindKCore(int);
+void FindClique();
+void coloring();
+bool myCompare(int a, int b) { return graph_rank[a] > graph_rank[b]; }
 
 int main(int argc, char *argv[])
 {
@@ -45,10 +51,10 @@ int main(int argc, char *argv[])
 
 	fin.close();
 
-	FindKCore(K);
+	// FindKCore(K);
+	FindClique();
 
 /*
-
 	cout << Max - 1 << graph_rank[Max - 1];
 */
 
@@ -74,7 +80,6 @@ void FindKCore(int K)
 	{
 		exist[i] = true;
 		coreness[i] = -1;
-		
 	}
 
 	do {
@@ -109,6 +114,94 @@ void FindKCore(int K)
 
 	fout.close();
 }
+
+void FindClique()
+{
+	coloring();
+
+
+
+	ofstream fout("clique.txt");
+	if (!fout)
+	{
+		cout << "fail\n";
+		exit(1);
+	}
+
+	// output...
+
+	fout.close();
+}
+
+void coloring()
+{
+	vector<int> index(Max + 1);
+	int MaxColor = 0;
+	bool available[MaxVertices + 1];
+
+	iota(index.begin(), index.end(), 0);
+
+	sort(index.begin(), index.end(), myCompare);
+
+
+	for (int i = 0; i <= Max; i++)
+	{
+		vertexColor[i] = -1;
+		available[i] = false;
+	}
+	
+	vertexColor[index[0]] = 0;
+	colorVertex[0].push_back(index[0]);
+
+	for (int i = 1; i <= Max; i++)
+	{
+		vector<int>::iterator it;
+
+		for (it = graph[index[i]].begin(); it < graph[index[i]].end(); ++it)
+			if (vertexColor[*it] != -1)
+				available[vertexColor[*it]] = true;
+
+		int cr;
+		for (cr = 0; cr < Max; cr++)
+			if (available[cr] == false)
+				break;
+
+		colorVertex[cr].push_back(index[i]);
+
+		vertexColor[index[i]] = cr;
+		MaxColor = max(cr, MaxColor);
+		
+		for (it = graph[index[i]].begin(); it < graph[index[i]].end(); ++it)
+			if (vertexColor[*it] != -1)
+				available[vertexColor[*it]] = false;
+	}
+
+/*
+	for (int i = 0; i <= Max; i++)
+	{
+		// cout << i << " " << vertexColor[i] << endl;
+	}
+
+	ofstream fout("test.txt");
+	if (!fout)
+	{
+		cout << "fail\n";
+		exit(1);
+	}
+
+	// output...
+	for (int i = 0; i <= MaxColor; i++)
+	{
+		fout << i << ": ";
+		for (auto it : colorVertex[i])
+			fout << it << " ";
+		fout << endl;
+	}
+
+	fout.close();
+*/
+}
+
 
 void signalHandler(int signum) {
 
