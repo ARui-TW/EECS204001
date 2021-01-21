@@ -63,38 +63,19 @@ void FindKCore(int K)
 		cout << "fail\n";
 		exit(1);
 	}
-
-/*
-	for (int i = 0; i <= Max; i++)
-	{
-		for (auto j : graph[i])
-		{
-			fout << i << " " << j << endl;
-		}
-	}
-*/
 	
 	vector<int> rank_modified(graph_rank);
-	// bool *exist = new bool(MaxVertices + 1);
-	// int *coreness = new int(MaxVertices +1);
-
 	bool exist[MaxVertices + 1];
 	int coreness[MaxVertices + 1];
-
-	cout << "ONe\n";
+	int modified_K = K;
+	bool to_stop;
 	
 	for (int i = 0; i <= MaxVertices; i++)
 	{
-		// cout << i << endl;
 		exist[i] = true;
 		coreness[i] = -1;
 		
 	}
-	 
-	int modified_K = K;
-
-	cout << "Twi\n";
-	bool to_stop;
 
 	do {
 		int count = 0;
@@ -106,13 +87,11 @@ void FindKCore(int K)
 					for (auto j : graph[count])
 						rank_modified[j]--;
 
-				cout << "THere:" << count << endl;
 				exist[count] = false;
 				coreness[count] = modified_K - 1;
 				count = -1;
 			}
 			count++;
-			// cout << "Here:" << count << endl;
 		}
 
 		to_stop = true;
@@ -120,41 +99,7 @@ void FindKCore(int K)
 			if (exist[i] == true) to_stop = false;
 
 		modified_K++;
-		cout << "K: " << modified_K << endl;
 	} while (!to_stop);
-/*
-	while (1)
-	{
-		bool to_break = true;
-		for (int i = 0; i <= Max; i++)
-			if (exist[i] == true) to_break = false;
-
-		if (to_break) break;
-		else K++;
-
-		int count = 0;
-		auto i = rank_modified.begin();
-		while (i != rank_modified.end())
-		{
-			if (*i < K && exist[count] == true)
-			{
-				for (auto j : graph[count])
-					rank_modified[j]--;
-
-				if (rank_modified[1] < K) cout << count << endl;
-				exist[count] = false;
-				coreness[count] = K - 1;
-				i = rank_modified.begin();
-				count = -1;
-			}
-			if (count != -1) i++;
-			count++;
-		}
-	}
-*/
-
-	fout << "====\n";
-	cout << K;
 
 	for (int i = 0; i <= Max; i++)
 	{
@@ -163,8 +108,6 @@ void FindKCore(int K)
 	}
 
 	fout.close();
-	cout << "Done\n";
-	exit(0);
 }
 
 void signalHandler(int signum) {
