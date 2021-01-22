@@ -15,15 +15,21 @@ using namespace std;
 
 vector<vector<int>> graph(MaxVertices);
 vector<int> graph_rank(MaxVertices);
+int coreness[MaxVertices + 1];
 int vertexColor[MaxVertices + 1];
 vector<vector<int>> colorVertex(MaxVertices);
+vector<int> index(MaxVertices);
+vector<int> bestClique;
 int Max = -1;
+int MaxColor = 0;
 
 void signalHandler(int);
 void FindKCore(int);
 void FindClique();
+void chooseVertex(int, vector<int>, bool*);
+bool isLinkAll(int, size_t, bool*);
 void coloring();
-bool myCompare(int a, int b) { return graph_rank[a] > graph_rank[b]; }
+bool myCompare(int a, int b) { return coreness[a] > coreness[b]; }
 
 int main(int argc, char *argv[])
 {
@@ -51,12 +57,8 @@ int main(int argc, char *argv[])
 
 	fin.close();
 
-	// FindKCore(K);
+	FindKCore(K);
 	FindClique();
-
-/*
-	cout << Max - 1 << graph_rank[Max - 1];
-*/
 
 	return 0;
 }
@@ -72,7 +74,6 @@ void FindKCore(int K)
 	
 	vector<int> rank_modified(graph_rank);
 	bool exist[MaxVertices + 1];
-	int coreness[MaxVertices + 1];
 	int modified_K = K;
 	bool to_stop;
 	
@@ -117,9 +118,11 @@ void FindKCore(int K)
 
 void FindClique()
 {
+	vector<int> cur;
+	bool inCur[MaxVertices] = {false};
 	coloring();
 
-
+	chooseVertex(0, cur, inCur);
 
 	ofstream fout("clique.txt");
 	if (!fout)
@@ -128,20 +131,58 @@ void FindClique()
 		exit(1);
 	}
 
-	// output...
+	sort(bestClique.begin(), bestClique.end());
+
+	for (auto i : bestClique)
+		fout << i << endl;
 
 	fout.close();
 }
 
+void chooseVertex(int inx, vector<int> cur, bool *inCur)
+{
+	if ((int)bestClique.size() == coreness[index[0]] + 1 || inx >= Max + 1)
+		return;
+
+	if (isLinkAll(index[inx], cur.size(), inCur))
+	{
+		cur.push_back(index[inx]);
+		inCur[index[inx]] = true;
+		if (cur.size() > bestClique.size())
+			bestClique = cur;
+
+		chooseVertex(inx + 1, cur, inCur);
+		cur.pop_back();
+		inCur[index[inx]] = false;
+		chooseVertex(inx + 1, cur, inCur);
+	}
+	else
+		chooseVertex(inx + 1, cur, inCur);
+
+}
+
+bool isLinkAll(int vertex, size_t size, bool *inCur)
+{
+	size_t count = 0;
+
+	if (size == 0)
+		return true;
+
+	for (auto i : graph[vertex])
+		if (inCur[i])
+			if (++count == size)
+				return true;
+
+	return false;
+}
+
 void coloring()
 {
-	vector<int> index(Max + 1);
-	int MaxColor = 0;
 	bool available[MaxVertices + 1];
 
 	iota(index.begin(), index.end(), 0);
 
-	sort(index.begin(), index.end(), myCompare);
+	sort(index.begin(), index.begin() + Max, myCompare);
 
 
 	for (int i = 0; i <= Max; i++)
@@ -175,31 +216,6 @@ void coloring()
 			if (vertexColor[*it] != -1)
 				available[vertexColor[*it]] = false;
 	}
-
-/*
-	for (int i = 0; i <= Max; i++)
-	{
-		// cout << i << " " << vertexColor[i] << endl;
-	}
-
-	ofstream fout("test.txt");
-	if (!fout)
-	{
-		cout << "fail\n";
-		exit(1);
-	}
-
-	// output...
-	for (int i = 0; i <= MaxColor; i++)
-	{
-		fout << i << ": ";
-		for (auto it : colorVertex[i])
-			fout << it << " ";
-		fout << endl;
-	}
-
-	fout.close();
-*/
 }
 
 
@@ -207,11 +223,21 @@ void signalHandler(int signum) {
 
 // In the signal handler, we output the current best clique that we found.
 
-	// fstream out("clique.txt");
+	ofstream fout("clique.txt");
+	if (!fout)
+	{
+		cout << "fail\n";
+		exit(1);
+	}
 
-	// output best...
+	vector<int> temp = bestClique;
 
-	exit(signum);
+	sort(temp.begin(), temp.end());
+
+	for (auto i : temp)
+		fout << i << endl;
+
+	fout.close();	exit(signum);
 }
 
 // By ARui
