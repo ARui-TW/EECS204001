@@ -17,7 +17,6 @@ vector<vector<int>> graph(MaxVertices);
 vector<int> graph_rank(MaxVertices);
 int coreness[MaxVertices + 1];
 int vertexColor[MaxVertices + 1];
-vector<vector<int>> colorVertex(MaxVertices);
 vector<int> index(MaxVertices);
 vector<int> bestClique;
 int Max = -1;
@@ -26,7 +25,7 @@ int MaxColor = 0;
 void signalHandler(int);
 void FindKCore(int);
 void FindClique();
-void chooseVertex(int, vector<int>, bool*);
+void chooseVertex(int, vector<int>, bool*, bool*);
 bool isLinkAll(int, size_t, bool*);
 void coloring();
 bool myCompare(int a, int b) { return coreness[a] > coreness[b]; }
@@ -120,9 +119,10 @@ void FindClique()
 {
 	vector<int> cur;
 	bool inCur[MaxVertices] = {false};
+	bool usedColor[MaxVertices] = {false};
 	coloring();
 
-	chooseVertex(0, cur, inCur);
+	chooseVertex(0, cur, inCur, usedColor);
 
 	ofstream fout("clique.txt");
 	if (!fout)
@@ -139,25 +139,27 @@ void FindClique()
 	fout.close();
 }
 
-void chooseVertex(int inx, vector<int> cur, bool *inCur)
+void chooseVertex(int inx, vector<int> cur, bool *inCur, bool *usedColor)
 {
 	if ((int)bestClique.size() == coreness[index[0]] + 1 || inx >= Max + 1)
 		return;
 
-	if (isLinkAll(index[inx], cur.size(), inCur))
+	if (usedColor[vertexColor[index[inx]]] == false && isLinkAll(index[inx], cur.size(), inCur))
 	{
 		cur.push_back(index[inx]);
 		inCur[index[inx]] = true;
+		usedColor[vertexColor[index[inx]]] = true;
 		if (cur.size() > bestClique.size())
 			bestClique = cur;
 
-		chooseVertex(inx + 1, cur, inCur);
+		chooseVertex(inx + 1, cur, inCur, usedColor);
 		cur.pop_back();
 		inCur[index[inx]] = false;
-		chooseVertex(inx + 1, cur, inCur);
+		usedColor[vertexColor[index[inx]]] = false;
+		chooseVertex(inx + 1, cur, inCur, usedColor);
 	}
 	else
-		chooseVertex(inx + 1, cur, inCur);
+		chooseVertex(inx + 1, cur, inCur, usedColor);
 
 }
 
@@ -192,7 +194,6 @@ void coloring()
 	}
 	
 	vertexColor[index[0]] = 0;
-	colorVertex[0].push_back(index[0]);
 
 	for (int i = 1; i <= Max; i++)
 	{
@@ -207,8 +208,6 @@ void coloring()
 			if (available[cr] == false)
 				break;
 
-		colorVertex[cr].push_back(index[i]);
-
 		vertexColor[index[i]] = cr;
 		MaxColor = max(cr, MaxColor);
 		
@@ -220,7 +219,6 @@ void coloring()
 
 
 void signalHandler(int signum) {
-
 // In the signal handler, we output the current best clique that we found.
 
 	ofstream fout("clique.txt");
